@@ -5,7 +5,7 @@ using UnityEngine.UIElements.Experimental;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed;
+    private float moveSpeed = 10f;
     private CharacterController controller;
 
     private Vector2 moveInput;
