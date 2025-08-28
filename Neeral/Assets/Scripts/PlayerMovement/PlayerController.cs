@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        Vector3 moveDir = new Vector3(-moveInput.x, 0, -moveInput.y);
+        Vector3 moveDir = new Vector3(moveInput.x, 0, moveInput.y);
         if (moveDir != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(moveDir);
