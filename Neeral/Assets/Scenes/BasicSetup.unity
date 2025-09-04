@@ -215,6 +215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 6
+  runSpeed: 9
   movementSmoothTime: 0.1
   accelerationTime: 0.08
   rotationSmoothTime: 0.08
@@ -365,6 +366,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 829801810dc6d5f438321f6ed6310d83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeCombat
+  minTimeBetweenAttacks: 0.8
+  comboResetThreshold: 1
+  isEquipped: 1
 --- !u!1 &498117120
 GameObject:
   m_ObjectHideFlags: 0

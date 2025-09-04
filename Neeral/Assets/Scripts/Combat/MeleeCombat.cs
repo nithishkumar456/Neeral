@@ -6,57 +6,81 @@ public class MeleeCombat : MonoBehaviour
     private Animator animator;
     private PlayerInput playerInput;
 
-    private int comboStep = 0;
+    // Attack parameters
     private bool isAttacking = false;
-    private float comboResetTime = 1f;
-    private float lastAttackTime;
+    private float timeSinceAttack;
+    private int attackPressCount = 0;
+
+    [Header("Settings")]
+    public float minTimeBetweenAttacks = 0.3f; // faster responsiveness
+    public float comboResetThreshold = 1.0f;
+    public bool isEquipped = true;
+
+    // Define the attack sequence here
+    // This means: Attack1, Attack1, Attack2, Attack3
+    private readonly string[] attackSequence = { "Attack1", "Attack1", "Attack2", "Attack3" };
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
         playerInput = GetComponent<PlayerInput>();
-        playerInput.actions["Attack"].performed += HandleAttack;
+
+        if (playerInput != null)
+        {
+            playerInput.actions["Attack"].performed += HandleAttack;
+        }
     }
 
-    private void OnEnable()
+    private void OnDestroy()
     {
-        playerInput.actions["Attack"].Enable();
+        if (playerInput != null)
+        {
+            playerInput.actions["Attack"].performed -= HandleAttack;
+        }
     }
 
-    private void OnDisable()
+    private void Update()
     {
-        playerInput.actions["Attack"].Disable();
+        timeSinceAttack += Time.deltaTime;
     }
 
     private void HandleAttack(InputAction.CallbackContext context)
     {
-        // Reset combo if idle too long
-        if (isAttacking && Time.time - lastAttackTime > comboResetTime)
+        // Must be grounded, equipped, and past min time between attacks
+        if (!animator.GetBool("Grounded") || timeSinceAttack < minTimeBetweenAttacks)
+            return;
+
+        if (!isEquipped)
+            return;
+
+        // Reset combo if too much time passed
+        if (timeSinceAttack > comboResetThreshold)
         {
-            comboStep = 0;
+            attackPressCount = 0;
         }
 
-        comboStep++;
+        // Pick the correct attack from the sequence
+        string attackAnim = attackSequence[attackPressCount];
 
-        if (comboStep == 1)
-            PlayAttack("Attack1");
-        else if (comboStep == 3)
-            PlayAttack("Attack2");
-        else if (comboStep == 4)
-            PlayAttack("Attack3");
+        // Trigger attack quickly
+        animator.CrossFade(attackAnim, 0.05f);
 
-        lastAttackTime = Time.time;
-    }
+        // Move to next attack in sequence
+        attackPressCount++;
 
-    private void PlayAttack(string animationName)
-    {
-        animator.Play(animationName, 0, 0f);
+        // If we've reached the end of the sequence, reset
+        if (attackPressCount >= attackSequence.Length)
+        {
+            attackPressCount = 0;
+        }
+
         isAttacking = true;
+        timeSinceAttack = 0;
     }
-    
-    public void EndAttack()
+
+    // Called from animation event
+    public void ResetAttack()
     {
         isAttacking = false;
-        animator.Play("Idle");
     }
 }

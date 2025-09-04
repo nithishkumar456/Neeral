@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
-using UnityEngine.PlayerLoop;
+using TMPro;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float moveSpeed = 6f;
+    public float runSpeed = 9f;
     public float movementSmoothTime = 0.1f;
     public float accelerationTime = 0.08f;
 
@@ -28,6 +29,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Animation")]
     public Animator animator;
+
     private CharacterController controller;
     private Vector2 moveInput;
     private Vector3 currentDirection;
@@ -35,11 +37,12 @@ public class PlayerController : MonoBehaviour
     private Vector3 lastFacingDirection = Vector3.forward;
 
     private float verticalVelocity;
-    private float   currentSpeed;
+    private float currentSpeed;
     private float speedVelocity;
 
     private bool isDashing;
     private float dashTimer;
+    private bool isRunning;
 
     void Awake()
     {
@@ -48,6 +51,8 @@ public class PlayerController : MonoBehaviour
 
     // INPUT CALLBACKS
     public void OnMove(InputValue value) => moveInput = value.Get<Vector2>();
+
+    public void OnRun(InputValue value) => isRunning = value.isPressed;
 
     public void OnJump(InputValue value)
     {
@@ -66,9 +71,15 @@ public class PlayerController : MonoBehaviour
         HandleMovementAndRotation();
 
         if (dashTimer > 0f)
+        {
             dashTimer -= Time.deltaTime;
+        }
 
-        animator.SetFloat("Speed", currentSpeed);
+        // Animation parameters
+        UpdateAnimatorSpeed();
+        animator.SetBool("Grounded", controller.isGrounded);
+        animator.SetBool("Jump", !controller.isGrounded && verticalVelocity > 0.1f);
+        animator.speed = 1f; // keep animation playback speed consistent
     }
 
     private void HandleMovementAndRotation()
@@ -83,7 +94,7 @@ public class PlayerController : MonoBehaviour
         float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref rotationVelocity, rotationSmoothTime);
         transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-        float targetSpeed = isDashing ? dashDistance / dashDuration : moveSpeed;
+        float targetSpeed = isDashing ? dashDistance / dashDuration : (isRunning ? runSpeed : moveSpeed);
         float desiredSpeed = targetDirection.magnitude * targetSpeed;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, desiredSpeed, ref speedVelocity, accelerationTime);
 
@@ -113,12 +124,15 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
         verticalVelocity = initialVel;
+
+        animator.SetTrigger("Jump");
     }
 
     IEnumerator SmoothDash()
     {
         isDashing = true;
         dashTimer = dashCooldown;
+        animator.SetBool("Dash", true);
 
         float elapsed = 0f;
         Vector3 dashDir = lastFacingDirection.normalized;
@@ -132,6 +146,16 @@ public class PlayerController : MonoBehaviour
             yield return null;
         }
 
+        animator.SetBool("Dash", false);
         isDashing = false;
+    }
+
+    private void UpdateAnimatorSpeed()
+    {
+        float speedParam;
+
+        if (moveInput != Vector2.zero) speedParam = 1f; // always full run animation
+        else speedParam = 0f; // idle
+        animator.SetFloat("Speed", speedParam, 0.1f, Time.deltaTime);
     }
 }
