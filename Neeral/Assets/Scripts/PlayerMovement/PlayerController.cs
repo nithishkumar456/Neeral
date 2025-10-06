@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
-using TMPro;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -51,7 +50,6 @@ public class PlayerController : MonoBehaviour
 
     // INPUT CALLBACKS
     public void OnMove(InputValue value) => moveInput = value.Get<Vector2>();
-
     public void OnRun(InputValue value) => isRunning = value.isPressed;
 
     public void OnJump(InputValue value)
@@ -71,22 +69,19 @@ public class PlayerController : MonoBehaviour
         HandleMovementAndRotation();
 
         if (dashTimer > 0f)
-        {
             dashTimer -= Time.deltaTime;
-        }
 
         // Animation parameters
         UpdateAnimatorSpeed();
         animator.SetBool("Grounded", controller.isGrounded);
         animator.SetBool("Jump", !controller.isGrounded && verticalVelocity > 0.1f);
-        animator.speed = 1f; // keep animation playback speed consistent
+        animator.speed = 1f;
     }
 
     private void HandleMovementAndRotation()
     {
         Vector3 targetDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         currentDirection = Vector3.SmoothDamp(currentDirection, targetDirection, ref directionVelocity, movementSmoothTime);
-
         if (currentDirection.sqrMagnitude > 0.001f)
             lastFacingDirection = currentDirection;
 
@@ -94,10 +89,12 @@ public class PlayerController : MonoBehaviour
         float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref rotationVelocity, rotationSmoothTime);
         transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
+        // Speed control
         float targetSpeed = isDashing ? dashDistance / dashDuration : (isRunning ? runSpeed : moveSpeed);
         float desiredSpeed = targetDirection.magnitude * targetSpeed;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, desiredSpeed, ref speedVelocity, accelerationTime);
 
+        // Gravity
         if (!isDashing)
         {
             if (controller.isGrounded && verticalVelocity < 0)
@@ -105,6 +102,7 @@ public class PlayerController : MonoBehaviour
             verticalVelocity += gravity * Time.deltaTime;
         }
 
+        // Final movement vector
         Vector3 move = currentDirection * currentSpeed;
         move.y = verticalVelocity;
 
@@ -152,10 +150,8 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimatorSpeed()
     {
-        float speedParam;
-
-        if (moveInput != Vector2.zero) speedParam = 1f; // always full run animation
-        else speedParam = 0f; // idle
+        float speedParam = (moveInput != Vector2.zero) ? 1f : 0f;
         animator.SetFloat("Speed", speedParam, 0.1f, Time.deltaTime);
     }
 }
+            
