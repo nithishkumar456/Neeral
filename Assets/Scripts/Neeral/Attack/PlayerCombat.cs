@@ -16,6 +16,8 @@ public class PlayerCombat : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         movement = GetComponent<PlayerMovement>();
+
+        animator.SetInteger("AttackIndex", 0);
     }
 
     public void Attack()
