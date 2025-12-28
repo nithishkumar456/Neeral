@@ -6,21 +6,24 @@ public class PlayerWeaponManager : MonoBehaviour
 
     private void Awake()
     {
-        EquipWeapon(GetComponentInChildren<WeaponHitbox>());
-    }
-
-    public void EquipWeapon(WeaponHitbox newWeapon)
-    {
-        currentWeapon = newWeapon;
+        currentWeapon = GetComponentInChildren<WeaponHitbox>();
     }
 
     public void EnableWeaponHitbox()
     {
-        currentWeapon?.EnableHitbox();
+        if (currentWeapon != null)
+            currentWeapon.EnableHitbox();
     }
 
     public void DisableWeaponHitbox()
     {
-        currentWeapon?.DisableHitbox();
+        if (currentWeapon != null)
+            currentWeapon.DisableHitbox();
+    }
+
+    // Call this when switching weapons
+    public void SetCurrentWeapon(WeaponHitbox newWeapon)
+    {
+        currentWeapon = newWeapon;
     }
 }
