@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
-    private Animator animator;
+    private PlayerAnimator playerAnimator;
     private PlayerMovement movement;
 
     private int attackIndex = 0;
@@ -12,12 +12,15 @@ public class PlayerCombat : MonoBehaviour
     private float comboResetTimer = 0f;
     private float comboResetTime = 1f;
 
+    [Header("Hit Detection")]
+    [SerializeField] private float attackRange = 1.5f;
+    [SerializeField] private float attackRadius = 0.7f;
+    [SerializeField] private LayerMask enemyLayer;
+
     private void Awake()
     {
-        animator = GetComponent<Animator>();
+        playerAnimator = GetComponent<PlayerAnimator>();
         movement = GetComponent<PlayerMovement>();
-
-        animator.SetInteger("AttackIndex", 0);
     }
 
     public void Attack()
@@ -27,8 +30,7 @@ public class PlayerCombat : MonoBehaviour
             movement.CanMove = false;
 
             attackIndex = 1;
-            animator.SetInteger("AttackIndex", attackIndex);
-            animator.SetTrigger("Attack");
+            playerAnimator.PlayAttack(attackIndex);
             isAttacking = true;
             return;
         }
@@ -36,7 +38,7 @@ public class PlayerCombat : MonoBehaviour
         if (canCombo && attackIndex < 3)
         {
             attackIndex++;
-            animator.SetInteger("AttackIndex", attackIndex);
+            playerAnimator.PlayAttack(attackIndex);
             canCombo = false;
         }
     }
@@ -65,10 +67,36 @@ public class PlayerCombat : MonoBehaviour
     private void ResetCombo()
     {
         attackIndex = 0;
-        animator.SetInteger("AttackIndex", 0);
+        playerAnimator.ResetAttackIndex();
         isAttacking = false;
         canCombo = false;
         comboResetTimer = 0f;
         movement.CanMove = true;
+    }
+
+    // Called by animation event
+    public void AttackHit()
+    {
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position + transform.forward * attackRange,
+            attackRadius,
+            enemyLayer
+        );
+
+        foreach (Collider hit in hits)
+        {
+            EnemyAnimator enemyAnim = hit.GetComponent<EnemyAnimator>();
+            if (enemyAnim != null)
+                enemyAnim.PlayHit();
+
+            // Later:
+            // hit.GetComponent<EnemyHealth>().TakeDamage(damageAmount);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position + transform.forward * attackRange, attackRadius);
     }
 }
