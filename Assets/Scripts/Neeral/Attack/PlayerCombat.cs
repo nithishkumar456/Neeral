@@ -74,26 +74,6 @@ public class PlayerCombat : MonoBehaviour
         movement.CanMove = true;
     }
 
-    // Called by animation event
-    public void AttackHit()
-    {
-        Collider[] hits = Physics.OverlapSphere(
-            transform.position + transform.forward * attackRange,
-            attackRadius,
-            enemyLayer
-        );
-
-        foreach (Collider hit in hits)
-        {
-            EnemyAnimator enemyAnim = hit.GetComponent<EnemyAnimator>();
-            if (enemyAnim != null)
-                enemyAnim.PlayHit();
-
-            // Later:
-            // hit.GetComponent<EnemyHealth>().TakeDamage(damageAmount);
-        }
-    }
-
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

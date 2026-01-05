@@ -11,17 +11,14 @@ public class PlayerWeaponManager : MonoBehaviour
 
     public void EnableWeaponHitbox()
     {
-        if (currentWeapon != null)
-            currentWeapon.EnableHitbox();
+        currentWeapon?.EnableHitbox();
     }
 
     public void DisableWeaponHitbox()
     {
-        if (currentWeapon != null)
-            currentWeapon.DisableHitbox();
+        currentWeapon?.DisableHitbox();
     }
 
-    // Call this when switching weapons
     public void SetCurrentWeapon(WeaponHitbox newWeapon)
     {
         currentWeapon = newWeapon;

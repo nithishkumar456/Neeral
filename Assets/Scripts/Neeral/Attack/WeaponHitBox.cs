@@ -4,30 +4,32 @@ using System.Collections.Generic;
 public class WeaponHitbox : MonoBehaviour
 {
     private bool canDealDamage = false;
-    private HashSet<EnemyAnimator> enemiesHit = new HashSet<EnemyAnimator>();
+
+    private HashSet<EnemyHealth> enemiesHit = new HashSet<EnemyHealth>();
 
     public void EnableHitbox()
     {
         canDealDamage = true;
-        enemiesHit.Clear(); 
+        enemiesHit.Clear();
     }
 
     public void DisableHitbox()
     {
         canDealDamage = false;
-        enemiesHit.Clear(); 
+        enemiesHit.Clear();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (!canDealDamage) return;
 
-        EnemyAnimator enemyAnim = other.GetComponentInParent<EnemyAnimator>();
-        if (enemyAnim == null) return;
+        EnemyHealth enemyHealth = other.GetComponentInParent<EnemyHealth>();
+        if (enemyHealth == null) return;
 
-        if (enemiesHit.Contains(enemyAnim)) return;
+        if (enemiesHit.Contains(enemyHealth)) return;
 
-        enemiesHit.Add(enemyAnim);
-        enemyAnim.PlayHit();
+        enemiesHit.Add(enemyHealth);
+
+        enemyHealth.TakeDamage(10);
     }
 }
