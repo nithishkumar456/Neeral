@@ -46,7 +46,5 @@ public class EnemyHealth : MonoBehaviour
 
         foreach (Collider col in GetComponentsInChildren<Collider>())
             col.enabled = false;
-
-        Destroy(gameObject, 0.2f);
     }
 }

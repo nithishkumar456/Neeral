@@ -29,6 +29,7 @@ public class EnemyAnimator : MonoBehaviour
 
     public void PlayDeath()
     {
+        animator.SetBool("IsDead", true);
         animator.SetTrigger("Die");
     }
 
